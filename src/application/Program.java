@@ -2,9 +2,11 @@ package application;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 import model.entities.Reservation;
+import model.exceptions.DomainException;
 
 public class Program {
 
@@ -13,16 +15,14 @@ public class Program {
 		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		Scanner scan = new Scanner(System.in);
 
-		System.out.print("Room number: ");
-		int roomNumber = scan.nextInt();
-		System.out.print("Check-in date (dd/MM/yyyy): ");
-		LocalDate checkIn = LocalDate.parse(scan.next(), dtf);
-		System.out.print("Check-out date (dd/MM/yyyy): ");
-		LocalDate checkOut = LocalDate.parse(scan.next(), dtf);
+		try {
+			System.out.print("Room number: ");
+			int roomNumber = scan.nextInt();
+			System.out.print("Check-in date (dd/MM/yyyy): ");
+			LocalDate checkIn = LocalDate.parse(scan.next(), dtf);
+			System.out.print("Check-out date (dd/MM/yyyy): ");
+			LocalDate checkOut = LocalDate.parse(scan.next(), dtf);
 
-		if (!checkOut.isAfter(checkIn)) {
-			System.out.println("Error in reservation: check-Out date must be after check-In date.");
-		} else {
 			Reservation reservation = new Reservation(roomNumber, checkIn, checkOut);
 			System.out.println("Reservation: " + reservation);
 
@@ -33,12 +33,18 @@ public class Program {
 			System.out.print("Check-out date (dd/MM/yyyy): ");
 			checkOut = LocalDate.parse(scan.next(), dtf);
 
-			String error = reservation.updateDates(checkIn, checkOut);
-			if (error != null) {
-				System.out.println("Error in reservation: " + error);
-			} else {
-				System.out.println("Reservation: " + reservation);
-			}
+			reservation.updateDates(checkIn, checkOut);
+			System.out.println("Reservation: " + reservation);
+
+		} 
+		catch (DateTimeParseException e) {
+			System.out.println("Invalid date format.");
+		} 
+		catch (DomainException e) {
+			System.out.println("Error in reservation: " + e.getMessage());
+		} 
+		catch (RuntimeException e) {
+			System.out.println("Unexpected error");
 		}
 
 		scan.close();
